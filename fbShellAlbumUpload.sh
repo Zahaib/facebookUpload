@@ -76,7 +76,7 @@ test $path  != invalid || usage
 
 if [ $accessToken = 'XXXXXXXXXXXXXXXXXXXXXX' ]
 	then
-	printf "\nPlease add an access token first above. Short lived user sccess tokens can be generated from: https://developers.facebook.com/\n"
+	printf "\nPlease add an access token above. Short lived user sccess tokens can be generated from: https://developers.facebook.com/\n"
 	exit 1
 fi
 
