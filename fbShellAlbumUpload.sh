@@ -3,17 +3,14 @@
 accessToken='XXXXXXXXXXXXXXXXXXXXXX' 
 
 #
-# TODO: Add support for names with spaces	
+# CHANGELOG:
+# Version 1.1, 27th Sep 2014: Support added for album names with spaces
+#
+
+#
 # TODO: Improve optarg checks
 # TODO: Add error checking to returned flags
 #
-
-if [ $accessToken = 'XXXXXXXXXXXXXXXXXXXXXX' ]
-	then
-	printf "\nPlease generate and add an access token in the above field. Short lived user sccess tokens can be generated from: https://developers.facebook.com/\n"
-	exit 1
-fi
-
 
 usage () { 
 	cat <<-USAGE
@@ -47,7 +44,7 @@ descrip () {
 
 printVersion () {
 	cat <<-VERSION
-	$0 version 1.0
+	$0 version 1.1
 	VERSION
 	exit 1
 }
@@ -58,7 +55,7 @@ path=invalid
 while getopts ":n:d:v:h" OPTNAME
 do
 	case "$OPTNAME" in
-	n)		album_name="$OPTARG" ;;
+	n)		album_name_raw="$OPTARG" ;;
 	d)		path="$OPTARG" ;;
 	v)		printVersion ;;
 	h)		descrip ;;
@@ -70,9 +67,18 @@ do
 	esac
 done
 
+album_name=$(echo $album_name_raw | sed 's/ /%20/g')
+
 # check if the album name and path is valid, this needs to be improved
 test $album_name != invalid || usage
 test $path  != invalid || usage
+
+
+if [ $accessToken = 'XXXXXXXXXXXXXXXXXXXXXX' ]
+	then
+	printf "\nPlease add an access token first above. Short lived user sccess tokens can be generated from: https://developers.facebook.com/\n"
+	exit 1
+fi
 
 
 # generate new album create URL
@@ -80,7 +86,7 @@ createAlbum_url="https://graph-video.facebook.com/me/albums?name=$album_name&acc
 
 # place the cURL request parse the returned flag to get albumID
 albumID=$(curl -s -X POST --url $createAlbum_url | cut -d: --complement -f1 | cut -d\" --complement -f1 | cut -d\" -f1) 
-printf "Album created with name: $album_name and albumID: $albumID\n"
+printf "Album created with name: \'$album_name_raw\' and albumID: $albumID\n"
 
 # generate photo upload URL
 upload_url="https://graph-video.facebook.com/$albumID/photos?&access_token=$accessToken"
